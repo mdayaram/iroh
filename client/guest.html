@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>club</title>
+  <style>
+    body {
+      background-color: black;
+    }
+
+    #videoplayer video {
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="videoplayer">
+    <video src="https://face.zoomface.club/loadingvideo.m4v" preload="auto" width="720" id="video"
+      style="display: none;"></video>
+    <button id="playbutton" onclick="startPlaying()"
+      style="width: 720px; height: 420px; background-color: #000; color: #fff;">Tap to Play</button>
+    <script>
+
+      let url = 'wss://face.zoomface.club/wsclub'
+
+      function setupSocket() {
+        let socket = new WebSocket(url);
+
+        socket.onmessage = function (event) {
+          let incomingMessage = event.data;
+          let video = document.getElementById('video')
+          if (isNaN(incomingMessage)) {
+            if (incomingMessage == 'pause') {
+              video.pause();
+            } else if (incomingMessage == 'play') {
+              video.play();
+            } else if (incomingMessage.startsWith("https://")) {
+              video.src = incomingMessage;
+            }
+            // not handled
+          } else {
+            video.currentTime = incomingMessage;
+          }
+        };
+
+        socket.onclose = function () {
+          setTimeout(setupSocket, 1000);
+        };
+
+        function keepalive() {
+          socket.send("!");
+          setTimeout(keepalive, 10000);
+        }
+
+        setTimeout(keepalive, 10000);
+      }
+
+      function startPlaying() {
+        var video = document.getElementById('video');
+        var button = document.getElementById('playbutton');
+        video.style.display = "inline";
+        button.style.display = "none";
+        var video = document.getElementById('video');
+        video.play();
+        setupSocket();
+      }
+
+
+
+    </script>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>club</title>
+</head>
+
+<body>
+  <!-- Or if you want a more recent canary version -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@canary"></script> -->
+
+  <form name="publish">
+    <input type="text" name="message" maxlength="50" />
+    <input type="submit" value="Send" />
+  </form>
+
+  <div id="messages"></div>
+
+  <script>
+    let url = 'wss://face.zoomface.club/wsclub'
+
+
+    function setupSocket() {
+
+      let socket = new WebSocket(url);
+
+      // send message from the form
+      document.forms.publish.onsubmit = function () {
+        let outgoingMessage = this.message.value;
+
+        socket.send(outgoingMessage);
+        return false;
+      };
+
+      // handle incoming messages
+      socket.onmessage = function (event) {
+        let incomingMessage = event.data;
+        showMessage(incomingMessage);
+      };
+
+      // show message in div#messages
+      function showMessage(message) {
+        if (message != "!") {
+          let messageElem = document.createElement('div');
+          messageElem.textContent = message;
+          document.getElementById('messages').prepend(messageElem);
+        }
+      }
+
+      socket.onclose = function () {
+        setTimeout(setupSocket, 1000);
+      };
+
+      function keepalive() {
+        socket.send("!");
+        setTimeout(keepalive, 10000);
+      }
+
+      setTimeout(keepalive, 10000);
+    }
+
+    setupSocket();
+
+  </script>
+</body>
+
+</html>
