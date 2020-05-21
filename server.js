@@ -15,7 +15,7 @@ var wss = new WebSocketServer({server: server})
 console.log("websocket server created")
 
 const clients = new Set();
-var lastURL = "loadingvideo.m4v"
+var lastURL = "https://storage.googleapis.com/iroh/loadingvideo.mp4"
 var lastTime = 0
 var timeUpdated = Date.now();
 var isPlaying = true
