@@ -1,30 +1,67 @@
-import * as express from 'express';
-import * as http from 'http';
-import * as WebSocket from 'ws';
+var WebSocketServer = require("ws").Server
+var http = require("http")
+var express = require("express")
+var app = express()
+var port = process.env.PORT || 5000
 
-const app = express();
+app.use(express.static(__dirname + "/public"))
 
-//initialize a simple http server
-const server = http.createServer(app);
+var server = http.createServer(app)
+server.listen(port)
 
-//initialize the WebSocket server instance
-const wss = new WebSocket.Server({ server });
+console.log("http server listening on %d", port)
 
-wss.on('connection', (ws: WebSocket) => {
+var wss = new WebSocketServer({server: server})
+console.log("websocket server created")
 
-    //connection is up, let's add a simple simple event
-    ws.on('message', (message: string) => {
+const clients = new Set();
+var lastURL = "loadingvideo.m4v"
+var lastTime = 0
+var timeUpdated = Date.now();
+var isPlaying = true
 
-        //log the received message and send it back to the client
-        console.log('received: %s', message);
-        ws.send(`Hello, you sent -> ${message}`);
-    });
+wss.on("connection", function(ws) {
+  clients.add(ws);
+  log(`new connection`);
+  var timeSinceUpdate = Date.now() - timeUpdated;
+  ws.send(lastURL)
+  setTimeout(function () { ws.send('play') }, 100);
+  setTimeout(function () { ws.send('pause') }, 200);
+  setTimeout(function () { ws.send(parseFloat(lastTime) + (timeSinceUpdate / 1000.0) + 2) }, 1000);
 
-    //send immediatly a feedback to the incoming connection
-    ws.send('Hi there, I am a WebSocket server');
-});
+  if (isPlaying) {
+    setTimeout(function () { ws.send('play') }, 2000);
+  }
 
-//start our server
-server.listen(process.env.PORT || 8999, () => {
-    console.log(`Server started on port ${server.address().port} :)`);
-});
+  ws.on('message', function (message) {
+    log(`message received: ${message}`);
+
+    message = message.slice(0, 5000); // max message length will be 5kb
+
+    if (isNaN(message)) {
+      if (message == 'pause') {
+        isPlaying = false
+      } else if (message == 'play') {
+        isPlaying = true
+      } else if (message.startsWith("https://")) {
+        lastURL = message;
+        lastTime = 0;
+        timeUpdated = Date.now();
+        isPlaying = false
+      }
+      // not handled
+    } else {
+      lastTime = message;
+      timeUpdated = Date.now();
+    }
+
+    for (let client of clients) {
+      client.send(message);
+    }
+  });
+
+  ws.on("close", function() {
+    log(`connection closed`);
+    clients.delete(ws);
+  })
+})
