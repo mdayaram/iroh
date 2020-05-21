@@ -22,7 +22,7 @@ var isPlaying = true
 
 wss.on("connection", function(ws) {
   clients.add(ws);
-  log(`new connection`);
+  console.log(`new connection`);
   var timeSinceUpdate = Date.now() - timeUpdated;
   ws.send(lastURL)
   setTimeout(function () { ws.send('play') }, 100);
@@ -34,7 +34,7 @@ wss.on("connection", function(ws) {
   }
 
   ws.on('message', function (message) {
-    log(`message received: ${message}`);
+    console.log(`message received: ${message}`);
 
     message = message.slice(0, 5000); // max message length will be 5kb
 
@@ -61,7 +61,7 @@ wss.on("connection", function(ws) {
   });
 
   ws.on("close", function() {
-    log(`connection closed`);
+    console.log(`connection closed`);
     clients.delete(ws);
   })
 })
