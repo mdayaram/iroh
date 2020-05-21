@@ -24,13 +24,13 @@
 
 <body>
   <div id="videoplayer">
-    <video src="https://face.zoomface.club/loadingvideo.m4v" preload="auto" width="720" id="video"
+    <video src="loadingvideo.m4v" preload="auto" width="720" id="video"
       style="display: none;"></video>
     <button id="playbutton" onclick="startPlaying()"
       style="width: 720px; height: 420px; background-color: #000; color: #fff;">Tap to Play</button>
     <script>
 
-      let url = 'wss://face.zoomface.club/wsclub'
+      let url = 'ws://localhost:8080/wsclub'
 
       function setupSocket() {
         let socket = new WebSocket(url);

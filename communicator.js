@@ -14,7 +14,7 @@ const wss = new ws.Server({ noServer: true });
 
 const clients = new Set();
 
-var lastURL = "https://face.zoomface.club/loadingvideo.m4v"
+var lastURL = "loadingvideo.m4v"
 var lastTime = 0
 var timeUpdated = Date.now();
 var isPlaying = true
