@@ -30,7 +30,7 @@
       style="width: 720px; height: 420px; background-color: #000; color: #fff;">Tap to Play</button>
     <script>
 
-      let url = 'ws://localhost:8080/wsclub'
+      let url = location.origin.replace(/^http/, 'ws') + '/wsclub'
 
       function setupSocket() {
         let socket = new WebSocket(url);

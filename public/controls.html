@@ -18,8 +18,7 @@
   <div id="messages"></div>
 
   <script>
-    let url = 'ws://localhost:8080/wsclub'
-
+    let url = location.origin.replace(/^http/, 'ws') + '/wsclub'
 
     function setupSocket() {
 
